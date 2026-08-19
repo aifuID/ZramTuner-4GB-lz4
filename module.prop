@@ -4,3 +4,4 @@ version=v4.9
 versionCode=49
 author=aifu-ID
 description=(c) @aifu-ID x AI - zram 4GB+lz4+swappiness20
+updateJson=https://raw.githubusercontent.com/aifuID/ZramTuner-4GB-lz4/main/update.json

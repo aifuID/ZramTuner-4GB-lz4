@@ -1,6 +1,6 @@
 id=zramtuner
-name=Zram 4GB+lz4
-version=v4.8
-versionCode=48
+name=Zram 4GB+lz4 Cool Edition
+version=v4.9
+versionCode=49
 author=aifu-ID
-description=(c) @aifu-ID x AI - zram 4GB+lz4
+description=(c) @aifu-ID x AI - zram 4GB+lz4+swappiness20

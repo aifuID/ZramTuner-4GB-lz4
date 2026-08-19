@@ -35,6 +35,7 @@ version=v4.9
 versionCode=49
 author=aifu-ID
 description=(c) @aifu-ID x AI - zram 4GB+lz4+swappiness20
+updateJson=https://raw.githubusercontent.com/aifuID/ZramTuner-4GB-lz4/main/update.json
 PROP
 
 msg "module.prop -> $(grep '^description=' $MDIR/module.prop 2>/dev/null)"

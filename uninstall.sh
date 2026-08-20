@@ -1,28 +1,27 @@
 #!/system/bin/sh
+# ==============================================
+#  ZRAM 4GB+lz4 COOL EDITION | v5.3
+#  Uninstall: restore stock ROM settings
+# ==============================================
 
-BACKUP=/data/adb/zramtuner_backup.conf
-SWB=/data/adb/zramtuner_swappiness.orig
 ZRAM=/dev/block/zram0
 SYS=/sys/block/zram0
+STOCK=/data/adb/zramtuner.stock
 
-# Cool Edition: kembalikan swappiness bawaan ROM
-if [ -f "$SWB" ]; then
-  echo "$(cat "$SWB")" > /proc/sys/vm/swappiness 2>/dev/null
-  rm -f "$SWB"
-fi
+BUSY=""
+for p in /data/adb/ksu/bin/busybox /data/adb/ap/bin/busybox /data/adb/kernelsu/bin/busybox /system/bin/busybox; do
+    [ -x "$p" ] && BUSY="$p" && break
+done
 
-# kembalikan setting zRAM asli
-if [ -f "$BACKUP" ]; then
-  . "$BACKUP"
-  swapoff $ZRAM 2>/dev/null
-  echo 1 > $SYS/reset 2>/dev/null
-  [ -n "$ORIG_ALGO" ] && echo "$ORIG_ALGO" > $SYS/comp_algorithm 2>/dev/null
-  [ -n "$ORIG_SIZE" ] && echo "$ORIG_SIZE" > $SYS/disksize 2>/dev/null
-  if [ "$ORIG_ACTIVE" = "1" ]; then
-    mkswap $ZRAM >/dev/null 2>&1
+if [ -f $STOCK ]; then
+    . $STOCK
+    swapoff $ZRAM 2>/dev/null
+    echo 1 > $SYS/reset 2>/dev/null
+    [ -n "$STOCK_ALGO" ] && echo $STOCK_ALGO > $SYS/comp_algorithm 2>/dev/null
+    [ -n "$STOCK_SIZE" ] && echo $STOCK_SIZE > $SYS/disksize 2>/dev/null
+    [ -n "$BUSY" ] && $BUSY mkswap $ZRAM >/dev/null 2>&1
     swapon $ZRAM 2>/dev/null
-  fi
-  rm -f "$BACKUP"
+    [ -n "$STOCK_SWAP" ] && echo $STOCK_SWAP > /proc/sys/vm/swappiness 2>/dev/null
+    rm -f $STOCK
 fi
-
-exit 0
+rm -f /data/adb/zramtuner.log

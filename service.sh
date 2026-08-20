@@ -29,7 +29,9 @@ echo "== v5.3 boot $(date) busy=$BUSY ==" > $LOG
 
 # FASE 0: foto settingan bawaan ROM (sekali saja, buat uninstall)
 if [ ! -f $STOCK ]; then
-    SALGO=$(cat $SYS/comp_algorithm | sed -n 's/.*$$$[^]]*$$$.*/\1/p')
+    SALGO=$(cat $SYS/comp_algorithm)
+    SALGO=${SALGO##*[}
+    SALGO=${SALGO%%]*}
     echo "STOCK_SIZE=$(cat $SYS/disksize)" > $STOCK
     echo "STOCK_ALGO=$SALGO" >> $STOCK
     echo "STOCK_SWAP=$(cat /proc/sys/vm/swappiness)" >> $STOCK

@@ -1,7 +1,6 @@
 id=zramtuner
-name=Zram 4GB+lz4 Cool Edition
-version=v5.2
-versionCode=52
-author=aifu-ID
-description=(c) @aifu-ID x AI - zram 4GB+lz4+swappiness20
-updateJson=https://raw.githubusercontent.com/aifuID/ZramTuner-4GB-lz4/main/update.json
+name=ZRAM 4GB+lz4 COOL EDITION
+version=v5.3
+versionCode=53
+author=@aifu-ID x AI
+description=ZRAM 4GB + lz4 + swappiness 10 (Cool Compromise). Fix v5.2: idle freq nyangkut & bodi hangat.

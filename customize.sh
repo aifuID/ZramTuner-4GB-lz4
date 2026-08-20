@@ -11,6 +11,15 @@ ui_print " (c) @aifu-ID x AI"
 ui_print "=================================="
 ui_print " "
 ui_print " - ZRAM 4GB + lz4"
-ui_print " - Swappiness 10 (adem & irit)"
+ui_print " - Swappiness 10"
 ui_print " "
-ui_print " Reboot buat mulai."
+
+# easter egg: ASCII art Evangelion
+if [ -f $MODPATH/evangelion.txt ]; then
+    while IFS= read -r line; do
+        ui_print "$line"
+    done < $MODPATH/evangelion.txt
+fi
+
+ui_print " "
+ui_print " Reboot now."

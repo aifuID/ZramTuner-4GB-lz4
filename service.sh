@@ -1,6 +1,6 @@
 #!/system/bin/sh
 # ==============================================
-#  ZRAM 4GB+lz4 COOL EDITION | v5.2 MKSWAP FIX
+#  ZRAM 4GB+lz4 COOL EDITION | v5.3 Change SWEP
 #  (c) @aifu-ID x AI
 # ==============================================
 
@@ -24,7 +24,7 @@ takeover() {
     swapon $ZRAM 2>/dev/null
 }
 
-echo "== v5.2 boot $(date) busy=$BUSY ==" > $LOG
+echo "== v5.3 boot $(date) busy=$BUSY ==" > $LOG
 
 # FASE 1: takeover awal (swap masih kosong)
 takeover
@@ -35,7 +35,7 @@ while [ "$(getprop sys.boot_completed)" != "1" ]; do
     sleep 2
 done
 sleep 3
-echo 20 > /proc/sys/vm/swappiness
+echo 10 > /proc/sys/vm/swappiness
 
 # FASE 3: verifikasi 3 hal (size + algo + swap AKTIF) + retry
 i=0
@@ -43,12 +43,12 @@ while [ $i -lt 5 ]; do
     cur=$(cat $SYS/disksize)
     algo=$(cat $SYS/comp_algorithm)
     active=$(grep -c zram0 /proc/swaps)
-    case "$algo" in *$$lz4$$*) ok=1 ;; *) ok=0 ;; esac
+    case "$algo" in *"[lz4]"*) ok=1 ;; *) ok=0 ;; esac
     [ "$cur" = "$SIZE" ] && [ "$ok" = "1" ] && [ "$active" = "1" ] && break
     echo 3 > /proc/sys/vm/drop_caches 2>/dev/null
     sleep 2
     takeover
-    echo 20 > /proc/sys/vm/swappiness
+    echo 10 > /proc/sys/vm/swappiness
     i=$((i + 1))
 done
 echo "final: size=$(cat $SYS/disksize) swappiness=$(cat /proc/sys/vm/swappiness) active=$(grep -c zram0 /proc/swaps) retries=$i" >> $LOG

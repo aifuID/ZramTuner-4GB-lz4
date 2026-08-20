@@ -1,7 +1,7 @@
-v5.1 🔥 Full Control
+v5.2 🧊 Mkswap Fix
 
-- FIX: ZRAM size + swappiness now BOTH enforced (two-phase strategy)
-- Phase 1 takes over size early at boot
-- Phase 2 locks swappiness after boot completes
-- Verification loop retries if the ROM fights back
+- FIX: swap now survives reboot (mkswap re-signs zram after reset)
+- Auto-detect busybox path for mkswap
+- Verification loop now checks size + algo + swap-active
+- Boot log at /data/adb/zramtuner.log
 - 

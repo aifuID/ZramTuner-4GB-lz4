@@ -18,8 +18,7 @@ takeover() {
 }
 
 # ---------- FASE 1: TAKEOVER AWAL ----------
-# saat ini pemakaian swap masih ~0 -> swapoff gampang
-# (jurus v4.9: menang SIZE)
+# swap masih ~0 -> swapoff gampang (jurus v4.9: menang SIZE)
 takeover
 
 # ---------- FASE 2: NUNGGU BOOT SELESAI ----------
@@ -28,12 +27,10 @@ while [ "$(getprop sys.boot_completed)" != "1" ]; do
 done
 sleep 3
 
-# penulis terakhir -> menang swappiness
-# (jurus v5.0: menang SWAPPINESS)
+# penulis terakhir -> menang swappiness (jurus v5.0)
 echo 20 > /proc/sys/vm/swappiness
 
 # ---------- FASE 3: VERIFIKASI + RETRY ----------
-# asuransi kalau ROM melawan balik di tengah boot
 i=0
 while [ $i -lt 5 ]; do
     cur=$(cat $SYS/disksize)

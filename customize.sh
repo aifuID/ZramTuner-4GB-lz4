@@ -31,8 +31,8 @@ esac
 cat > $MDIR/module.prop << 'PROP'
 id=zramtuner
 name=Zram 4GB+lz4 Cool Edition
-version=v5.0
-versionCode=50
+version=v5.1
+versionCode=51
 author=aifu-ID
 description=(c) @aifu-ID x AI - zram 4GB+lz4+swappiness20
 updateJson=https://raw.githubusercontent.com/aifuID/ZramTuner-4GB-lz4/main/update.json

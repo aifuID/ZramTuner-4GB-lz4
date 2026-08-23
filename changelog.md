@@ -22,4 +22,4 @@
   - cat /data/adb/zramtuner.log
   - swappiness=10 active=1 retries=0
 - Flash → reboot → done. ❄️
-- 
+  

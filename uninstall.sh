@@ -2,7 +2,7 @@
 # ==============================================
 #  ZramTuner v6.0 - uninstall.sh
 #  id: zramtuner
-#  Restore setting original saat uninstall
+#  Restore original settings on uninstall
 # ==============================================
 BAK=/data/adb/zramtuner_backup.conf
 if   [ -x /data/adb/ksu/bin/busybox ]; then BB="/data/adb/ksu/bin/busybox"

@@ -97,6 +97,18 @@ if [ -n "$CPU_MIN" ]; then
   log "CPU floor: $CPU_MIN kHz"
 fi
 
+# ---------- kunci swappiness setelah boot selesai (warisan v5.3) ----------
+t=0
+while [ "$(getprop sys.boot_completed)" != "1" ] && [ "$t" -lt 120 ]; do
+  sleep 2; t=$((t+2))
+done
+sleep 3
+echo "$SWAP" > /proc/sys/vm/swappiness 2>/dev/null
+log "swappiness locked: $(cat /proc/sys/vm/swappiness)"
+
+# ---------- bersihkan sisa file v5.3 ----------
+rm -f /data/adb/zramtuner.stock
+
 # ---------- verifikasi ----------
 if grep -q zram0 /proc/swaps; then
   log "SUCCESS: $(cat /sys/block/zram0/disksize) bytes | $ALGO | swappiness $(cat /proc/sys/vm/swappiness)"

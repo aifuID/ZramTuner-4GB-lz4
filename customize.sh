@@ -1,6 +1,6 @@
 #!/system/bin/sh
 # ==============================================
-#  ZramTuner v6.0 - customize.sh (jalan saat flash)
+#  ZramTuner v6.0 - customize.sh (runs at flash time)
 #  id: zramtuner
 # ==============================================
 ui_print ""
@@ -14,21 +14,21 @@ if [ -f "$MODPATH/evangelion.txt" ]; then
   while IFS= read -r line; do ui_print "$line"; done < "$MODPATH/evangelion.txt"
 fi
 
-# ---------- cek versi android ----------
+# ---------- android version check ----------
 SDK=$(getprop ro.build.version.sdk)
 if [ "$SDK" -lt 31 ] || [ "$SDK" -gt 37 ]; then
   ui_print "! Warning: SDK $SDK outside tested range (31-37)"
   ui_print "! Continuing anyway..."
 fi
 
-# ---------- deteksi root manager ----------
+# ---------- root manager detection ----------
 if [ -d /data/adb/ksu ]; then MGR="KernelSU"
 elif [ -d /data/adb/ap ]; then MGR="APatch"
 elif [ -d /data/adb/magisk ]; then MGR="Magisk"
 else MGR="unknown"; fi
 ui_print "• Root manager : $MGR"
 
-# ---------- cek busybox ----------
+# ---------- busybox check ----------
 if [ -x /data/adb/ksu/bin/busybox ] || [ -x /data/adb/ap/bin/busybox ] || [ -x /data/adb/magisk/busybox ]; then
   ui_print "• BusyBox      : bundled ✔"
 else
@@ -36,7 +36,7 @@ else
   [ "$MGR" = "Magisk" ] && ui_print "! Magisk: install BusyBox module (osm0sis) + OverlayFS meta"
 fi
 
-# ---------- permission ----------
+# ---------- permissions ----------
 set_perm 0 0 0755 "$MODPATH/service.sh"
 set_perm 0 0 0755 "$MODPATH/uninstall.sh"
 

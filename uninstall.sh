@@ -1,27 +1,22 @@
 #!/system/bin/sh
 # ==============================================
-#  ZRAM 4GB+lz4 COOL EDITION | v5.3
-#  Uninstall: restore stock ROM settings
+#  ZramTuner v6.0 - uninstall.sh
+#  id: zramtuner
+#  Restore setting original saat uninstall
 # ==============================================
-
-ZRAM=/dev/block/zram0
-SYS=/sys/block/zram0
-STOCK=/data/adb/zramtuner.stock
-
-BUSY=""
-for p in /data/adb/ksu/bin/busybox /data/adb/ap/bin/busybox /data/adb/kernelsu/bin/busybox /system/bin/busybox; do
-    [ -x "$p" ] && BUSY="$p" && break
-done
-
-if [ -f $STOCK ]; then
-    . $STOCK
-    swapoff $ZRAM 2>/dev/null
-    echo 1 > $SYS/reset 2>/dev/null
-    [ -n "$STOCK_ALGO" ] && echo $STOCK_ALGO > $SYS/comp_algorithm 2>/dev/null
-    [ -n "$STOCK_SIZE" ] && echo $STOCK_SIZE > $SYS/disksize 2>/dev/null
-    [ -n "$BUSY" ] && $BUSY mkswap $ZRAM >/dev/null 2>&1
-    swapon $ZRAM 2>/dev/null
-    [ -n "$STOCK_SWAP" ] && echo $STOCK_SWAP > /proc/sys/vm/swappiness 2>/dev/null
-    rm -f $STOCK
+BAK=/data/adb/zramtuner_backup.conf
+if   [ -x /data/adb/ksu/bin/busybox ]; then BB="/data/adb/ksu/bin/busybox"
+elif [ -x /data/adb/ap/bin/busybox  ]; then BB="/data/adb/ap/bin/busybox"
+elif [ -x /data/adb/magisk/busybox  ]; then BB="/data/adb/magisk/busybox"
+else BB="/system/bin/toybox"
 fi
-rm -f /data/adb/zramtuner.log
+[ -f "$BAK" ] || exit 0
+. "$BAK"
+grep -q zram0 /proc/swaps && $BB swapoff /dev/block/zram0 2>/dev/null
+echo 1 > /sys/block/zram0/reset 2>/dev/null
+[ -n "$ORIG_ALGO" ] && echo "$ORIG_ALGO" > /sys/block/zram0/comp_algorithm 2>/dev/null
+[ -n "$ORIG_SIZE" ] && echo "$ORIG_SIZE" > /sys/block/zram0/disksize 2>/dev/null
+$BB swapon /dev/block/zram0 2>/dev/null
+[ -n "$ORIG_SW" ] && echo "$ORIG_SW" > /proc/sys/vm/swappiness 2>/dev/null
+rm -f "$BAK"
+exit 0

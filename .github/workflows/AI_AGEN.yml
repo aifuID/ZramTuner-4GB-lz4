@@ -1,0 +1,22 @@
+name: AI_AGEN
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: "Perintah untuk Claude"
+        required: true
+
+jobs:
+  claude:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code@latest
+      - name: Jalankan Claude
+        env:
+          ANTHROPIC_AUTH_TOKEN: ${{ secrets.AI_AGEN }}
+          ANTHROPIC_BASE_URL: https://agentrouter.org
+          ANTHROPIC_MODEL: claude-opus-4-6
+        run: claude -p "${{ github.event.inputs.prompt }}" --dangerously-skip-permissions
+

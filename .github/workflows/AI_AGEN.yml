@@ -16,7 +16,7 @@ jobs:
       - name: Jalankan Claude
         env:
           ANTHROPIC_AUTH_TOKEN: ${{ secrets.AI_AGEN }}
-          ANTHROPIC_BASE_URL: https://agentrouter.org
+          ANTHROPIC_BASE_URL: https://co.agentrouter.org
           ANTHROPIC_MODEL: claude-opus-4-8
         run: claude -p "${{ github.event.inputs.prompt }}" --dangerously-skip-permissions
 

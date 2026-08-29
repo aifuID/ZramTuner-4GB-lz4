@@ -3,8 +3,18 @@ on:
   workflow_dispatch:
     inputs:
       prompt:
-        description: "Perintah untuk Claude"
+        description: "Perintah untuk AI"
         required: true
+      model:
+        description: "Pilih model"
+        type: choice
+        default: deepseek-v4-flash
+        options:
+          - deepseek-v4-flash
+          - claude-opus-4-8
+          - claude-opus-5
+          - glm-5.3
+          - gpt-5.6-sol
 
 jobs:
   claude:
@@ -13,10 +23,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install Claude Code
         run: npm install -g @anthropic-ai/claude-code@latest
-      - name: Jalankan Claude
+      - name: Jalankan AI
         env:
           ANTHROPIC_AUTH_TOKEN: ${{ secrets.AI_AGEN }}
           ANTHROPIC_BASE_URL: https://co.agentrouter.org
-          ANTHROPIC_MODEL: claude-opus-4-8
+          ANTHROPIC_MODEL: ${{ github.event.inputs.model }}
         run: claude -p "${{ github.event.inputs.prompt }}" --dangerously-skip-permissions
-

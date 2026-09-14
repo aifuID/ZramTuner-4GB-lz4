@@ -1,10 +1,10 @@
 #!/system/bin/sh
 # ==============================================
-#  ZramTuner v6.0 - customize.sh (runs at flash time)
+#  ZramTuner v6.1 - customize.sh (runs at flash time)
 #  id: zramtuner
 # ==============================================
 ui_print ""
-ui_print "⚡ ZramTuner v6.0 - Universal Edition"
+ui_print "⚡ ZramTuner v6.1 - Universal Edition"
 ui_print "   ZRAM 4GB + lz4 (strict) | Android 12-17"
 ui_print "   Magisk / KernelSU / APatch"
 ui_print ""

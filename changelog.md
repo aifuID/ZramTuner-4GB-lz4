@@ -1,22 +1,9 @@
-## Major Update to Android 17
-## v6.0 "Universal Edition"
-- Support Android 12–17 (API 31–37)
-- Support Magisk / KernelSU / APatch
-- Auto-detect BusyBox (KSU / APatch / Magisk) + toybox fallback
-- Compression algorithm: lz4 only (auto-detect lz4 / lz4hc profile)
-- External config: /data/adb/zramtuner.conf (size, swappiness, CPU floor)
-- Optional CPU frequency floor (default off)
-- Swappiness locked after boot_completed (anti-ROM-override)
-- Magisk users: BusyBox module (osm0sis) + OverlayFS meta module required
-- Anti-bootloop & uninstall auto-restore (unchanged)
-## v5.3 "Cool Compromise"
-- Swappiness 20 → 10 — CPU can deep-idle again (fixes stuck idle freq & warm body)
-- Live tested: idle 595–633 MHz, −280 mA screen-on, cool body
-- What's unchanged: ZRAM 4GB + lz4 (the proven combo)
-- What's new:
-  - Auto-capture of stock ROM settings on first boot
-  - Uninstall now fully restores stock ZRAM (algo, size, swappiness)
-- Boot check:
-  - cat /data/adb/zramtuner.log
-  - swappiness=10 active=1 retries=0
-- Flash → reboot → done. ❄️
+# ZramTuner Universal Edition v6.1
+- Hybrid governor: adaptive swappiness (cool=base / hot-warm=60 / hot-crit=100),
+  thermal veto at 41.0C, recovery hysteresis
+- Anti-hijack reflex: foreign swappiness writes reverted within one 60s patrol
+- govsay diary: full-date timestamps in /data/adb/zramgov.log
+- Logcat voice: events tagged ZramGov (best-effort; early-boot entries may be
+  lost to logcat ring rotation - diary remains canonical)
+- Honest conf: governor reads SWAP= from /data/adb/zramtuner.conf (no silent fallback)
+- Housekeeping: v6.1 stamps unified, English-only sources

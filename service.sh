@@ -1,6 +1,6 @@
 #!/system/bin/sh
 # ==============================================
-#  ZramTuner v6.0 "Universal Edition"
+#  ZramTuner v6.1 "Universal Edition"
 #  id: zramtuner
 #  ZRAM 4GB + lz4 (strict) | swappiness 10
 #  Android 12-17 (API 31-37)
@@ -19,7 +19,7 @@ ALGO=lz4               # lz4 only (fallback profile: lz4hc)
 
 # ---------- user config ----------
 if [ ! -f "$CONF" ]; then
-  printf '# ZramTuner v6.0 config\nSIZE=4294967296\nSWAP=10\nALGO=lz4\n#CPU_MIN=595000\n' > "$CONF"
+  printf '# ZramTuner v6.1 config\nSIZE=4294967296\nSWAP=10\nALGO=lz4\n#CPU_MIN=595000\n' > "$CONF"
 fi
 . "$CONF"
 
@@ -115,4 +115,40 @@ if grep -q zram0 /proc/swaps; then
 else
   log "FAIL: zram0 not active"
 fi
-exit 0
+
+# === ZRAMTUNER v6.1 HYBRID GOVERNOR ===
+govsay(){ /system/bin/log -p i -t ZramGov "$1" 2>/dev/null; echo "$(date '+%Y-%m-%d %H:%M:%S') $1" >> /data/adb/zramgov.log; }
+(
+  CONF=/data/adb/zramtuner.conf
+  BASE="$(grep -m1 '^SWAP=' "$CONF" 2>/dev/null | cut -d= -f2 | tr -d '[:space:]')"
+  [ -n "$BASE" ] || BASE=10
+  LOW=1500000; CRIT=900000; BACK=2500000; HOT=410
+  MODE=cool; LASTM=""
+  while true; do
+    sleep 60
+    AVAIL="$(grep MemAvailable /proc/meminfo | tr -s ' ' | cut -d' ' -f2)"
+    [ -n "$AVAIL" ] || AVAIL=999999999
+    TEMP="$(cat /sys/class/power_supply/battery/temp 2>/dev/null || echo 0)"
+    if [ "$TEMP" -ge "$HOT" ]; then
+      T=$BASE; M=cool-thermal
+    elif [ "$MODE" = hot ]; then
+      if [ "$AVAIL" -gt "$BACK" ]; then MODE=cool; T=$BASE; M=cool
+      elif [ "$AVAIL" -lt "$CRIT" ]; then T=100; M=hot-crit
+      else T=60; M=hot-warm; fi
+    else
+      if [ "$AVAIL" -lt "$CRIT" ]; then MODE=hot; T=100; M=hot-crit
+      elif [ "$AVAIL" -lt "$LOW" ]; then MODE=hot; T=60; M=hot-warm
+      else T=$BASE; M=cool; fi
+    fi
+    CUR="$(cat /proc/sys/vm/swappiness 2>/dev/null)"
+    if [ "$CUR" != "$T" ]; then
+      echo "$T" > /proc/sys/vm/swappiness 2>/dev/null
+      if [ "$M" != "$LASTM" ]; then
+        govsay "mode $LASTM -> $M (avail=${AVAIL}kB temp=$TEMP) swp=$T"
+      else
+        govsay "enforce $CUR -> $T (mode $M)"
+      fi
+    fi
+    LASTM=$M
+  done
+) >/dev/null 2>&1 &

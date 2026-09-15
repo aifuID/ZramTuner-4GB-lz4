@@ -1,45 +1,40 @@
-#!/system/bin/sh
-# ==============================================
-#  ZramTuner v6.1 - customize.sh (runs at flash time)
-#  id: zramtuner
-# ==============================================
-ui_print ""
-ui_print "⚡ ZramTuner v6.1 - Universal Edition"
-ui_print "   ZRAM 4GB + lz4 (strict) | Android 12-17"
-ui_print "   Magisk / KernelSU / APatch"
-ui_print ""
+### ZramTuner v6.2 - customize.sh (AEGIS Protocol)
+SKIPMOUNT=false
+PROPFILE=false
+POSTFSDATA=false
+LATESTARTSERVICE=true
 
-# ---------- easter egg ascii art ----------
-if [ -f "$MODPATH/evangelion.txt" ]; then
-  while IFS= read -r line; do ui_print "$line"; done < "$MODPATH/evangelion.txt"
-fi
+print_modname() {
+  ui_print "════════════════════════════════════════"
+  ui_print "  ZramTuner v6.2 — AEGIS Protocol"
+  ui_print "  Sentinel armed. Intruders will be neutralized."
+  ui_print "  'This is the fate.' — Rei"
+  ui_print "════════════════════════════════════════"
+}
 
-# ---------- android version check ----------
-SDK=$(getprop ro.build.version.sdk)
-if [ "$SDK" -lt 31 ] || [ "$SDK" -gt 37 ]; then
-  ui_print "! Warning: SDK $SDK outside tested range (31-37)"
-  ui_print "! Continuing anyway..."
-fi
+on_install() {
+  ui_print "- Installing ZRAM module..."
+  unzip -o "$ZIPFILE" module.prop service.sh uninstall.sh zramwatch.sh evangelion.txt -d "$TMPDIR" > /dev/null
+  mkdir -p "$MODPATH"
+  mv "$TMPDIR/module.prop"     "$MODPATH/"
+  mv "$TMPDIR/service.sh"      "$MODPATH/"
+  mv "$TMPDIR/uninstall.sh"    "$MODPATH/"
+  mv "$TMPDIR/zramwatch.sh"    "$MODPATH/"
+  mv "$TMPDIR/evangelion.txt"  "$MODPATH/"
+  # permissions
+  chmod 755 "$MODPATH/service.sh"
+  chmod 755 "$MODPATH/uninstall.sh"
+  chmod 755 "$MODPATH/zramwatch.sh"
+  chmod 644 "$MODPATH/module.prop"
+  chmod 644 "$MODPATH/evangelion.txt"
+}
 
-# ---------- root manager detection ----------
-if [ -d /data/adb/ksu ]; then MGR="KernelSU"
-elif [ -d /data/adb/ap ]; then MGR="APatch"
-elif [ -d /data/adb/magisk ]; then MGR="Magisk"
-else MGR="unknown"; fi
-ui_print "• Root manager : $MGR"
-
-# ---------- busybox check ----------
-if [ -x /data/adb/ksu/bin/busybox ] || [ -x /data/adb/ap/bin/busybox ] || [ -x /data/adb/magisk/busybox ]; then
-  ui_print "• BusyBox      : bundled ✔"
-else
-  ui_print "• BusyBox      : not bundled (toybox fallback active)"
-  [ "$MGR" = "Magisk" ] && ui_print "! Magisk: install BusyBox module (osm0sis) + OverlayFS meta"
-fi
-
-# ---------- permissions ----------
-set_perm 0 0 0755 "$MODPATH/service.sh"
-set_perm 0 0 0755 "$MODPATH/uninstall.sh"
-
-ui_print ""
-ui_print "✔ Flash complete - reboot to apply"
-exit 0
+# v6.2: relocate config & log into the Citadel (module directory)
+[ -f /data/adb/zramtuner.conf ] && mv -f /data/adb/zramtuner.conf "$MODPATH/zramtuner.conf"
+[ -f /data/adb/zramtuner.log ]  && mv -f /data/adb/zramtuner.log  "$MODPATH/zramtuner.log"
+rm -f /data/adb/zramtuner_backup.conf
+[ -f "$MODPATH/zramtuner.conf" ] || printf 'SWAP=10\n' > "$MODPATH/zramtuner.conf"
+ui_print "- Config relocated: $MODPATH/zramtuner.conf"
+ui_print "- Blackbox relocated: $MODPATH/zramtuner.log"
+ui_print "- Legacy files purged from /data/adb"
+ui_print "- ZramTuner v6.2 installed (watchdog armed)"

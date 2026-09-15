@@ -6,4 +6,4 @@
 - Logcat voice: events tagged ZramGov (best-effort; early-boot entries may be
   lost to logcat ring rotation - diary remains canonical)
 - Honest conf: governor reads SWAP= from /data/adb/zramtuner.conf (no silent fallback)
-- Housekeeping: v6.1 stamps unified, English-only sources
+- Housekeeping: v6.1 stamps unified.

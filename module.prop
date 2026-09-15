@@ -1,7 +1,7 @@
 id=zramtuner
-name=ZramTuner Universal Edition
-version=v6.1
-versionCode=61
-author=aifu-ID x AI
-description=@aifu-ID ZRAM4GB+lz4-swappiness-Hybrid - Android 12-17
+name=ZramTuner
+version=v6.2
+versionCode=62
+author=@aifu-ID x AI
+description=ZRAM & VM tuner — lz4 + strict swappiness policy, guarded by the AEGIS sentinel daemon
 updateJson=https://raw.githubusercontent.com/aifuID/ZramTuner-4GB-lz4/main/update.json

@@ -12,6 +12,12 @@ print_modname() {
   ui_print "════════════════════════════════════════"
 }
 
+# v6.2: Rei Pilot EVA
+[ -f "$MODPATH/evangelion.txt" ] || unzip -o "$ZIPFILE" 'evangelion.txt' -d "$MODPATH" >/dev/null 2>&1
+if [ -f "$MODPATH/evangelion.txt" ]; then
+  while IFS= read -r _rei; do ui_print "$_rei"; done < "$MODPATH/evangelion.txt"
+fi
+
 on_install() {
   ui_print "- Installing ZRAM module..."
   unzip -o "$ZIPFILE" module.prop service.sh uninstall.sh zramwatch.sh evangelion.txt -d "$TMPDIR" > /dev/null

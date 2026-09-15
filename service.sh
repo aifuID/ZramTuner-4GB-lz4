@@ -1,14 +1,14 @@
 #!/system/bin/sh
 # ==============================================
-#  ZramTuner v6.1 "Universal Edition"
+#  ZramTuner v6.2 "AEGIS Protocol"
 #  id: zramtuner
 #  ZRAM 4GB + lz4 (strict) | swappiness 10
 #  Android 12-17 (API 31-37)
 #  Magisk / KernelSU / APatch
+#  Sentinel: zramwatch.sh (60s patrol cycle)
 # ==============================================
-LOG=/data/adb/zramtuner.log
-CONF=/data/adb/zramtuner.conf
-BAK=/data/adb/zramtuner_backup.conf
+LOG=/data/adb/modules/zramtuner/zramtuner.log
+CONF=/data/adb/modules/zramtuner/zramtuner.conf
 log() { echo "[$(date '+%m-%d %H:%M:%S')] $*" >> "$LOG"; }
 
 # ---------- defaults ----------
@@ -17,11 +17,12 @@ SWAP=10
 ALGO=lz4               # lz4 only (fallback profile: lz4hc)
 #CPU_MIN=595000        # (optional) CPU floor in kHz - remove # to enable
 
-# ---------- user config ----------
-if [ ! -f "$CONF" ]; then
-  printf '# ZramTuner v6.1 config\nSIZE=4294967296\nSWAP=10\nALGO=lz4\n#CPU_MIN=595000\n' > "$CONF"
-fi
+# ---------- user config (v6.2: self-healing + sanitizer) ----------
+[ -f "$CONF" ] || printf '# ZramTuner v6.2 config\nSIZE=4294967296\nSWAP=10\nALGO=lz4\n#CPU_MIN=595000\n' > "$CONF"
 . "$CONF"
+case "$SWAP" in ''|*[!0-9]*) SWAP=10;; esac
+case "$SIZE" in ''|*[!0-9]*) SIZE=4294967296;; esac
+log "config: SWAP=$SWAP SIZE=$SIZE (sanitized)"
 
 # ---------- busybox / toybox detection ----------
 if   [ -x /data/adb/ksu/bin/busybox ]; then BB="/data/adb/ksu/bin/busybox"
@@ -41,15 +42,6 @@ log "=== boot SDK=$SDK manager=$MGR bb=$BB ==="
 i=0
 while [ ! -d /sys/block/zram0 ] && [ "$i" -lt 30 ]; do sleep 1; i=$((i+1)); done
 [ -d /sys/block/zram0 ] || { log "ERROR: zram0 not found"; exit 0; }
-
-# ---------- backup original settings (first boot only) ----------
-if [ ! -f "$BAK" ]; then
-  O_SIZE=$(cat /sys/block/zram0/disksize)
-  O_ALGO=$(cat /sys/block/zram0/comp_algorithm | sed 's/.*$$$[^]]*$$$.*/\1/')
-  O_SW=$(cat /proc/sys/vm/swappiness)
-  printf 'ORIG_SIZE=%s\nORIG_ALGO=%s\nORIG_SW=%s\n' "$O_SIZE" "$O_ALGO" "$O_SW" > "$BAK"
-  log "backup: size=$O_SIZE algo=$O_ALGO sw=$O_SW"
-fi
 
 # ---------- lz4 profile detection ----------
 if [ "$ALGO" = "auto" ]; then ALGO=lz4; fi
@@ -97,58 +89,25 @@ if [ -n "$CPU_MIN" ]; then
   log "CPU floor: $CPU_MIN kHz"
 fi
 
-# ---------- lock swappiness after boot completed (v5.3 legacy) ----------
+# ---------- lock swappiness after boot completed ----------
 t=0
 while [ "$(getprop sys.boot_completed)" != "1" ] && [ "$t" -lt 120 ]; do
   sleep 2; t=$((t+2))
 done
 sleep 3
 echo "$SWAP" > /proc/sys/vm/swappiness 2>/dev/null
-log "swappiness locked: $(cat /proc/sys/vm/swappiness)"
+log "AEGIS: swappiness pinned to $(cat /proc/sys/vm/swappiness) (policy: STRICT)"
 
-# ---------- clean up v5.3 leftover files ----------
+# ---------- clean up legacy files ----------
 rm -f /data/adb/zramtuner.stock
 
 # ---------- verification ----------
 if grep -q zram0 /proc/swaps; then
-  log "SUCCESS: $(cat /sys/block/zram0/disksize) bytes | $ALGO | swappiness $(cat /proc/sys/vm/swappiness)"
+  log "AEGIS ONLINE: $(cat /sys/block/zram0/disksize) bytes | $ALGO | swappiness $(cat /proc/sys/vm/swappiness)"
 else
-  log "FAIL: zram0 not active"
+  log "AEGIS OFFLINE: zram0 not active"
 fi
 
-# === ZRAMTUNER v6.1 HYBRID GOVERNOR ===
-govsay(){ /system/bin/log -p i -t ZramGov "$1" 2>/dev/null; echo "$(date '+%Y-%m-%d %H:%M:%S') $1" >> /data/adb/zramgov.log; }
-(
-  CONF=/data/adb/zramtuner.conf
-  BASE="$(grep -m1 '^SWAP=' "$CONF" 2>/dev/null | cut -d= -f2 | tr -d '[:space:]')"
-  [ -n "$BASE" ] || BASE=10
-  LOW=1500000; CRIT=900000; BACK=2500000; HOT=410
-  MODE=cool; LASTM=""
-  while true; do
-    sleep 60
-    AVAIL="$(grep MemAvailable /proc/meminfo | tr -s ' ' | cut -d' ' -f2)"
-    [ -n "$AVAIL" ] || AVAIL=999999999
-    TEMP="$(cat /sys/class/power_supply/battery/temp 2>/dev/null || echo 0)"
-    if [ "$TEMP" -ge "$HOT" ]; then
-      T=$BASE; M=cool-thermal
-    elif [ "$MODE" = hot ]; then
-      if [ "$AVAIL" -gt "$BACK" ]; then MODE=cool; T=$BASE; M=cool
-      elif [ "$AVAIL" -lt "$CRIT" ]; then T=100; M=hot-crit
-      else T=60; M=hot-warm; fi
-    else
-      if [ "$AVAIL" -lt "$CRIT" ]; then MODE=hot; T=100; M=hot-crit
-      elif [ "$AVAIL" -lt "$LOW" ]; then MODE=hot; T=60; M=hot-warm
-      else T=$BASE; M=cool; fi
-    fi
-    CUR="$(cat /proc/sys/vm/swappiness 2>/dev/null)"
-    if [ "$CUR" != "$T" ]; then
-      echo "$T" > /proc/sys/vm/swappiness 2>/dev/null
-      if [ "$M" != "$LASTM" ]; then
-        govsay "mode $LASTM -> $M (avail=${AVAIL}kB temp=$TEMP) swp=$T"
-      else
-        govsay "enforce $CUR -> $T (mode $M)"
-      fi
-    fi
-    LASTM=$M
-  done
-) >/dev/null 2>&1 &
+# ---------- v6.2: launch sentinel ----------
+setsid /data/adb/modules/zramtuner/zramwatch.sh >/dev/null 2>&1 &
+exit 0

@@ -1,6 +1,6 @@
 #!/system/bin/sh
 # ==============================================
-#  ZramTuner v6.2 "AEGIS Protocol"
+#  ZramTuner v6.2.1 "AEGIS Protocol"
 #  id: zramtuner
 #  ZRAM 4GB + lz4 (strict) | swappiness 10
 #  Android 12-17 (API 31-37)
@@ -17,7 +17,7 @@ SWAP=10
 ALGO=lz4               # lz4 only (fallback profile: lz4hc)
 #CPU_MIN=595000        # (optional) CPU floor in kHz - remove # to enable
 
-# ---------- user config (v6.2: self-healing + sanitizer) ----------
+# ---------- user config (v6.2.1: self-healing + sanitizer) ----------
 [ -f "$CONF" ] || printf '# ZramTuner v6.2 config\nSIZE=4294967296\nSWAP=10\nALGO=lz4\n#CPU_MIN=595000\n' > "$CONF"
 . "$CONF"
 case "$SWAP" in ''|*[!0-9]*) SWAP=10;; esac
@@ -108,6 +108,8 @@ else
   log "AEGIS OFFLINE: zram0 not active"
 fi
 
-# ---------- v6.2: launch sentinel ----------
-setsid /data/adb/modules/zramtuner/zramwatch.sh >/dev/null 2>&1 &
+# ---------- v6.2.1: launch sentinel (sh + anti-dupe + setsid) ----------
+if ! ps -ef | grep -v grep | grep -q "zramwatch.sh"; then
+  setsid sh /data/adb/modules/zramtuner/zramwatch.sh >/dev/null 2>&1 &
+fi
 exit 0

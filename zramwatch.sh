@@ -1,6 +1,6 @@
 #!/system/bin/sh
 # ══════════════════════════════════════════════════════
-#  AEGIS SENTINEL — ZramTuner v6.2
+#  AEGIS SENTINEL — ZramTuner v6.2.1
 #  Boot-persistent swappiness guardian.
 #  Patrol cycle: 60 s. Unauthorized writes: neutralized.
 #  Every kill is timestamped in the blackbox log.

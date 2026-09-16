@@ -1,6 +1,6 @@
 #!/system/bin/sh
 # ==============================================
-#  ZramTuner v6.2 - uninstall.sh (AEGIS Protocol)
+#  ZramTuner v6.2.1 - uninstall.sh (AEGIS Protocol)
 #  id: zramtuner
 #  Restore original settings on uninstall
 # ==============================================
@@ -22,7 +22,7 @@ $BB swapon /dev/block/zram0 2>/dev/null || {
 [ -n "$ORIG_SW" ] && echo "$ORIG_SW" > /proc/sys/vm/swappiness 2>/dev/null
 [ -z "$ORIG_SW" ] && echo 60 > /proc/sys/vm/swappiness 2>/dev/null
 
-# ---------- v6.2: purge all traces (Citadel + legacy) ----------
+# ---------- v6.2.1: purge all traces (Citadel + legacy) ----------
 rm -f /data/adb/zramtuner.conf /data/adb/zramtuner.log /data/adb/zramtuner_backup.conf /data/adb/service.d/zramwatch.sh /data/adb/swaphunt.log
 pkill -f zramwatch.sh 2>/dev/null
 rm -f "$BAK"
